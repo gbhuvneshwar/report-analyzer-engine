@@ -1,0 +1,98 @@
+version: '3.8'
+services:
+  book-info:
+    build:
+      context: ./book-info-service
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/bookstore
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - mongo
+      - redis
+  order:
+    build:
+      context: ./order-service
+    ports:
+      - "8001:8000"
+    environment:
+      - POSTGRES_DSN=postgresql://user:password@postgres:5432/bookstore
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+  cart:
+    build:
+      context: ./cart-service
+    ports:
+      - "8002:8000"
+    environment:
+      - POSTGRES_DSN=postgresql://user:password@postgres:5432/bookstore
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+  wishlist:
+    build:
+      context: ./wishlist-service
+    ports:
+      - "8003:8000"
+    environment:
+      - POSTGRES_DSN=postgresql://user:password@postgres:5432/bookstore
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+  payment:
+    build:
+      context: ./payment-service
+    ports:
+      - "8004:8000"
+    environment:
+      - POSTGRES_DSN=postgresql://user:password@postgres:5432/bookstore
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=bookstore
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+    ports:
+      - "2181:2181"
+volumes:
+  postgres_data:
+  mongo_data:

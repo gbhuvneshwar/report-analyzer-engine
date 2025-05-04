@@ -1,0 +1,26 @@
+CREATE TABLE cart_items (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    book_ids TEXT[] NOT NULL,
+    match_status VARCHAR(20),
+    comments TEXT
+);
+
+CREATE TABLE orders (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    book_ids TEXT[] NOT NULL
+);
+
+CREATE TABLE wishlists (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
+    book_ids TEXT[] NOT NULL
+);
+
+CREATE TABLE payments (
+    id VARCHAR(50) PRIMARY KEY,
+    order_id VARCHAR(50) NOT NULL,
+    amount FLOAT NOT NULL,
+    status VARCHAR(20) NOT NULL
+);

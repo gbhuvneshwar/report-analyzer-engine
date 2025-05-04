@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: book-info-deployment
+  namespace: bookstore
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: book-info
+  template:
+    metadata:
+      labels:
+        app: book-info
+    spec:
+      containers:
+      - name: book-info
+        image: bookstore-book-info:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secrets
+              key: mongo-uri
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secrets
+              key: redis-url
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: book-info-service
+  namespace: bookstore
+spec:
+  selector:
+    app: book-info
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000
+  type: LoadBalancer
